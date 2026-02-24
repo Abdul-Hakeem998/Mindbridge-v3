@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindBridge — AI Mental Health Support</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══ DESIGN TOKENS ═══ */
+:root{
+  --accent:#7C6EE6;--accent2:#5B8EF0;--green:#3DDC97;--amber:#F5A623;--rose:#F05C5C;
+  --gradient:linear-gradient(135deg,var(--accent),var(--accent2));
+  --gradient-warm:linear-gradient(135deg,var(--amber),var(--rose));
+  --gradient-cool:linear-gradient(135deg,var(--green),var(--accent2));
+  --trans:background .3s,color .3s,border-color .3s,box-shadow .3s;
+  --r:12px;--r-lg:20px;--r-xl:28px;
+}
+
+/* ═══ DARK THEME ═══ */
+[data-theme="dark"]{
+  --bg:#0C0C0F;--bg2:#121218;--bg3:#1A1A24;--bg4:#22222E;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.13);
+  --txt:#F0EFF8;--txt2:#A8A6C0;--txt3:#6B6987;
+  --card-bg:#13131C;--card-shadow:0 2px 16px rgba(0,0,0,.4),0 8px 40px rgba(0,0,0,.3);
+  --topbar:#0C0C0F;--topbar-border:rgba(255,255,255,.06);
+  --input-bg:#1A1A24;--input-border:rgba(255,255,255,.1);
+  --pill-bg:rgba(255,255,255,.05);--pill-border:rgba(255,255,255,.1);
+  --mist:rgba(124,110,230,.1);--forest:#A8C5DA;
+  --quiz-bg:#121218;--opt-bg:#1A1A24;--opt-sel:#22222E;
+  --chat-bg:#0C0C0F;--msg-user-bg:linear-gradient(135deg,var(--accent),var(--accent2));--msg-ai-bg:#1A1A24;
+  --process-bg:#0C0C0F;--crisis-bg:#13131C;
+  --result-hero-bg:#0C0C0F;
+}
+
+/* ═══ LIGHT THEME ═══ */
+[data-theme="light"]{
+  --bg:#F4F3FC;--bg2:#FFFFFF;--bg3:#EDEAF7;--bg4:#E5E1F2;
+  --border:rgba(100,90,180,.12);--border2:rgba(100,90,180,.2);
+  --txt:#1A1825;--txt2:#524E6E;--txt3:#8F8BAA;
+  --card-bg:#FFFFFF;--card-shadow:0 2px 12px rgba(100,90,180,.08),0 8px 32px rgba(100,90,180,.06);
+  --topbar:#FFFFFF;--topbar-border:rgba(100,90,180,.1);
+  --input-bg:#FFFFFF;--input-border:rgba(100,90,180,.15);
+  --pill-bg:rgba(124,110,230,.05);--pill-border:rgba(124,110,230,.15);
+  --mist:rgba(124,110,230,.08);--forest:#3B3472;
+  --quiz-bg:#F4F3FC;--opt-bg:#FFFFFF;--opt-sel:#F0EEFF;
+  --chat-bg:#F4F3FC;--msg-user-bg:linear-gradient(135deg,var(--accent),var(--accent2));--msg-ai-bg:#FFFFFF;
+  --process-bg:#F4F3FC;--crisis-bg:#1A1825;
+  --result-hero-bg:#1A1825;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;transition:var(--trans);}
+
+/* ═══ SCREENS ═══ */
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;animation:screenIn .4s cubic-bezier(.4,0,.2,1) both;}
+@keyframes screenIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ TOPBAR ═══ */
+.topbar{background:var(--topbar);border-bottom:1px solid var(--topbar-border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);}
+.topbar-brand{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--txt);display:flex;align-items:center;gap:10px;letter-spacing:-.3px;}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:var(--gradient);display:inline-block;flex-shrink:0;}
+.topbar-meta{font-size:12px;color:var(--txt3);text-align:right;line-height:1.5;}
+.topbar-meta strong{color:var(--txt2);font-weight:600;}
+.topbar-actions{display:flex;align-items:center;gap:8px;}
+.btn-theme{background:var(--bg3);border:1px solid var(--border);color:var(--txt2);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.btn-theme:hover{background:var(--bg4);color:var(--txt);}
+.btn-back-top{background:var(--bg3);border:1px solid var(--border);color:var(--txt2);padding:7px 14px;border-radius:100px;font-size:12px;font-family:'Manrope',sans-serif;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-back-top:hover{background:var(--bg4);color:var(--txt);}
+
+/* ═══ ONBOARDING SLIDES ═══ */
+#s-onboard{background:var(--bg);overflow:hidden;position:relative;}
+.ob-slides{display:flex;width:300%;transition:transform .6s cubic-bezier(.4,0,.2,1);}
+.ob-slide{width:33.333%;flex-shrink:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 32px;text-align:center;position:relative;overflow:hidden;}
+
+/* Slide 1 - deep purple/indigo */
+.ob-slide-1{background:linear-gradient(145deg,#0D0B1A 0%,#1A1235 50%,#0D0B1A 100%);}
+.ob-s1-glow1{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(124,110,230,.4),transparent 70%);top:-200px;left:-100px;animation:floatGlow 8s ease-in-out infinite alternate;}
+.ob-s1-glow2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(91,142,240,.3),transparent 70%);bottom:-100px;right:-50px;animation:floatGlow 10s ease-in-out infinite alternate-reverse;}
+@keyframes floatGlow{to{transform:translate(30px,20px) scale(1.05)}}
+
+/* Slide 2 - emerald/teal */
+.ob-slide-2{background:linear-gradient(145deg,#051510 0%,#0A2B20 50%,#051510 100%);}
+.ob-s2-glow1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(61,220,151,.35),transparent 70%);top:-150px;right:-100px;animation:floatGlow 9s ease-in-out infinite alternate;}
+.ob-s2-glow2{position:absolute;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(91,142,240,.25),transparent 70%);bottom:-80px;left:-60px;animation:floatGlow 11s ease-in-out infinite alternate-reverse;}
+
+/* Slide 3 - amber/rose */
+.ob-slide-3{background:linear-gradient(145deg,#140A05 0%,#241408 50%,#140A05 100%);}
+.ob-s3-glow1{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,.3),transparent 70%);top:-120px;left:-80px;animation:floatGlow 7s ease-in-out infinite alternate;}
+.ob-s3-glow2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(240,92,92,.3),transparent 70%);bottom:-100px;right:-60px;animation:floatGlow 12s ease-in-out infinite alternate-reverse;}
+
+.ob-content{position:relative;z-index:1;max-width:420px;animation:obFadeUp .7s ease both;}
+@keyframes obFadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.ob-icon-wrap{width:88px;height:88px;border-radius:28px;margin:0 auto 32px;display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;}
+.ob-icon-1{background:linear-gradient(135deg,rgba(124,110,230,.3),rgba(91,142,240,.2));border:1px solid rgba(124,110,230,.3);}
+.ob-icon-2{background:linear-gradient(135deg,rgba(61,220,151,.3),rgba(91,142,240,.2));border:1px solid rgba(61,220,151,.3);}
+.ob-icon-3{background:linear-gradient(135deg,rgba(245,166,35,.3),rgba(240,92,92,.2));border:1px solid rgba(245,166,35,.3);}
+.ob-eyebrow{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px;}
+.ob-slide-1 .ob-eyebrow{color:rgba(124,110,230,.8);}
+.ob-slide-2 .ob-eyebrow{color:rgba(61,220,151,.8);}
+.ob-slide-3 .ob-eyebrow{color:rgba(245,166,35,.8);}
+.ob-title{font-family:'Syne',sans-serif;font-size:clamp(30px,6vw,46px);font-weight:800;color:#fff;line-height:1.1;letter-spacing:-1.5px;margin-bottom:20px;}
+.ob-title .hi{display:block;}
+.ob-slide-1 .ob-title .hi{background:linear-gradient(135deg,#B4AEFF,#8CBAFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ob-slide-2 .ob-title .hi{background:linear-gradient(135deg,#3DDC97,#8CBAFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ob-slide-3 .ob-title .hi{background:linear-gradient(135deg,#F5A623,#F05C5C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ob-body{font-size:16px;font-weight:300;line-height:1.75;color:rgba(255,255,255,.55);margin-bottom:32px;}
+.ob-stats-row{display:flex;gap:20px;justify-content:center;margin-bottom:0;}
+.ob-stat{text-align:center;}
+.ob-stat-n{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#fff;line-height:1;}
+.ob-stat-l{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px;font-weight:500;}
+.ob-slide-1 .ob-stat-n{background:linear-gradient(135deg,#B4AEFF,#8CBAFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ob-slide-2 .ob-stat-n{background:linear-gradient(135deg,#3DDC97,#8CBAFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ob-slide-3 .ob-stat-n{background:linear-gradient(135deg,#F5A623,#F05C5C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ob-tag-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.ob-tag{padding:7px 14px;border-radius:100px;font-size:12px;font-weight:500;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.55);background:rgba(255,255,255,.05);}
+.ob-slide-1 .ob-tag{border-color:rgba(124,110,230,.25);color:rgba(180,174,255,.7);}
+.ob-slide-2 .ob-tag{border-color:rgba(61,220,151,.25);color:rgba(61,220,151,.7);}
+.ob-slide-3 .ob-tag{border-color:rgba(245,166,35,.25);color:rgba(245,166,35,.7);}
+
+/* Onboard nav */
+.ob-nav{position:absolute;bottom:40px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:20px;z-index:10;}
+.ob-dots{display:flex;gap:8px;}
+.ob-dot{width:8px;height:8px;border-radius:100px;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s;}
+.ob-dot.on{width:28px;background:#fff;}
+.ob-btns{display:flex;gap:12px;align-items:center;}
+.btn-ob-skip{background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.5);padding:11px 22px;border-radius:100px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-ob-skip:hover{border-color:rgba(255,255,255,.4);color:#fff;}
+.btn-ob-next{background:#fff;color:#0C0C0F;padding:11px 28px;border-radius:100px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:all .2s;letter-spacing:.2px;}
+.btn-ob-next:hover{transform:scale(1.03);}
+.btn-ob-start{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:14px 36px;border-radius:100px;font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .2s;box-shadow:0 8px 32px rgba(124,110,230,.5);letter-spacing:.3px;}
+.btn-ob-start:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(124,110,230,.6);}
+.ob-theme-btn{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;z-index:20;transition:all .2s;}
+.ob-theme-btn:hover{background:rgba(255,255,255,.15);}
+.ob-swipe-hint{position:absolute;bottom:120px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(255,255,255,.3);font-weight:500;letter-spacing:.5px;display:flex;align-items:center;gap:6px;white-space:nowrap;pointer-events:none;animation:hintFade 4s 1s ease forwards;}
+@keyframes hintFade{0%,60%{opacity:1}100%{opacity:0}}
+.ob-slides{cursor:grab;}
+.ob-slides:active{cursor:grabbing;}
+
+/* ═══ LANDING ═══ */
+#s-land{background:var(--bg);position:relative;overflow:hidden;align-items:center;justify-content:center;text-align:center;padding:60px 24px 120px;}
+.land-glow1{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(124,110,230,.2),transparent 70%);top:-200px;left:-150px;pointer-events:none;}
+.land-glow2{position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(61,220,151,.12),transparent 70%);bottom:-100px;right:-100px;pointer-events:none;}
+.land-inner{position:relative;z-index:1;max-width:580px;}
+.land-theme-btn{position:absolute;top:20px;right:20px;z-index:10;}
+.logo-mark{width:80px;height:80px;margin:0 auto 32px;background:var(--gradient);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 8px 40px rgba(124,110,230,.5);animation:popIn .7s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes popIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+.land-inner h1{font-family:'Syne',sans-serif;font-size:clamp(52px,11vw,88px);font-weight:800;color:var(--txt);line-height:.95;letter-spacing:-3px;margin-bottom:10px;animation:fadeUp .7s .1s ease both;}
+.land-inner h1 .grad{background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.land-tagline{font-size:17px;font-weight:300;color:var(--txt2);margin-bottom:36px;line-height:1.6;animation:fadeUp .7s .2s ease both;}
+.trust-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:32px;animation:fadeUp .7s .3s ease both;}
+.trust-pill{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:100px;background:var(--pill-bg);border:1px solid var(--pill-border);font-size:12px;font-weight:500;color:var(--txt2);}
+.tpd{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.land-actions{display:flex;flex-direction:column;align-items:center;gap:12px;animation:fadeUp .7s .4s ease both;}
+.btn-start{display:inline-flex;align-items:center;gap:10px;padding:18px 48px;background:var(--gradient);color:#fff;font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;border:none;border-radius:100px;cursor:pointer;box-shadow:0 8px 36px rgba(124,110,230,.45);transition:all .25s;letter-spacing:.3px;}
+.btn-start:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(124,110,230,.6);}
+.btn-dashboard{display:inline-flex;align-items:center;gap:8px;padding:12px 30px;background:var(--bg3);color:var(--txt2);font-family:'Manrope',sans-serif;font-size:14px;font-weight:500;border:1px solid var(--border2);border-radius:100px;cursor:pointer;transition:all .2s;}
+.btn-dashboard:hover{background:var(--bg4);color:var(--txt);}
+.land-sub{font-size:12px;color:var(--txt3);line-height:1.7;margin-top:14px;animation:fadeUp .7s .5s ease both;}
+.instruments-note{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:24px;animation:fadeUp .7s .55s ease both;}
+.inst-tag{padding:5px 12px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);font-size:11px;color:var(--txt3);font-weight:600;letter-spacing:.3px;}
+
+/* ═══ DEMOGRAPHICS ═══ */
+#s-demo{background:var(--bg);}
+.page-body{flex:1;padding:32px 24px 80px;max-width:700px;margin:0 auto;width:100%;}
+.page-header{margin-bottom:28px;}
+.page-header h2{font-family:'Syne',sans-serif;font-size:clamp(24px,5vw,32px);font-weight:800;color:var(--txt);line-height:1.15;margin-bottom:10px;letter-spacing:-1px;}
+.page-header p{font-size:14px;color:var(--txt3);line-height:1.65;}
+.anon-strip{background:var(--mist);border:1px solid rgba(124,110,230,.15);border-radius:12px;padding:13px 16px;display:flex;gap:10px;align-items:flex-start;margin-bottom:28px;font-size:13px;color:var(--txt2);line-height:1.55;}
+.anon-strip.result{background:var(--mist);}
+.form-section{margin-bottom:24px;}
+.form-section-title{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--txt3);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.form-section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:520px){.form-grid{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:7px;}
+.field.full{grid-column:1/-1;}
+.f-label{font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--txt3);}
+.f-label .req{color:var(--rose);margin-left:2px;}
+.f-input,.f-select{width:100%;padding:13px 16px;border:1.5px solid var(--input-border);border-radius:10px;background:var(--input-bg);font-family:'Manrope',sans-serif;font-size:15px;color:var(--txt);outline:none;transition:var(--trans);-webkit-appearance:none;appearance:none;}
+.f-input:focus,.f-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,110,230,.15);}
+.f-input::placeholder{color:var(--txt3);}
+.f-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6987' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:42px;cursor:pointer;}
+.pill-group{display:flex;flex-wrap:wrap;gap:8px;}
+.r-pill{padding:10px 18px;border:1.5px solid var(--input-border);border-radius:100px;font-size:13px;font-weight:500;color:var(--txt2);cursor:pointer;transition:all .18s;background:var(--input-bg);user-select:none;}
+.r-pill:hover{border-color:var(--accent);color:var(--accent);}
+.r-pill.on{border-color:var(--accent);background:rgba(124,110,230,.1);color:var(--accent);font-weight:600;}
+.btn-primary-full{width:100%;padding:17px;background:var(--gradient);color:#fff;font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;border:none;border-radius:var(--r);cursor:pointer;transition:all .25s;opacity:.45;letter-spacing:.3px;margin-top:24px;box-shadow:0 4px 20px rgba(124,110,230,.3);}
+.btn-primary-full.ready{opacity:1;}
+.btn-primary-full.ready:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(124,110,230,.5);}
+
+/* ═══ QUIZ ═══ */
+#s-quiz{background:var(--quiz-bg);}
+.quiz-body{flex:1;padding:28px 24px 80px;max-width:720px;margin:0 auto;width:100%;}
+.prog-wrap{margin-bottom:28px;}
+.prog-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+.prog-label{font-size:13px;font-weight:600;color:var(--txt2);}
+.prog-frac{font-size:12px;color:var(--txt3);}
+.prog-track{height:5px;background:var(--border);border-radius:10px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--gradient);border-radius:10px;transition:width .6s cubic-bezier(.34,1.1,.64,1);}
+.inst-header{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+.inst-name{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--txt);letter-spacing:-.3px;}
+.inst-count{font-size:12px;color:var(--txt3);font-weight:500;}
+.inst-timeframe{font-size:12px;color:var(--txt3);margin-top:3px;}
+.q-card{background:var(--card-bg);border-radius:var(--r-lg);box-shadow:var(--card-shadow);margin-bottom:20px;border:1px solid var(--border);overflow:hidden;}
+.q-card-top{padding:28px 28px 0;}
+.q-num{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:12px;}
+.q-text{font-family:'Instrument Serif',serif;font-size:clamp(18px,3vw,22px);line-height:1.5;color:var(--txt);margin-bottom:0;}
+.options-wrap{padding:20px 20px 24px;}
+.opt-scale{display:flex;flex-direction:column;gap:10px;}
+.opt-btn{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:10px;border:1.5px solid var(--border);background:var(--opt-bg);cursor:pointer;text-align:left;transition:all .18s;width:100%;}
+.opt-btn:hover{border-color:var(--accent);background:var(--mist);}
+.opt-btn.on{border-color:var(--accent);background:rgba(124,110,230,.1);}
+.opt-circle{width:30px;height:30px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--txt3);flex-shrink:0;transition:all .18s;}
+.opt-btn.on .opt-circle{background:var(--gradient);border-color:transparent;color:#fff;}
+.opt-main{flex:1;}
+.opt-main-label{font-size:14px;font-weight:600;color:var(--txt);transition:color .18s;}
+.opt-sub{font-size:12px;color:var(--txt3);margin-top:2px;}
+.opt-score{font-size:12px;color:var(--txt3);font-weight:600;}
+.opt-btn.on .opt-main-label{color:var(--accent);}
+.item9-warn{background:rgba(240,92,92,.1);border:1px solid rgba(240,92,92,.2);border-radius:10px;padding:14px 18px;margin:0 20px 16px;font-size:13px;color:var(--rose);line-height:1.55;}
+.q-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.btn-back{padding:13px 24px;background:var(--bg3);border:1.5px solid var(--border);border-radius:100px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .2s;}
+.btn-back:hover{background:var(--bg4);color:var(--txt);}
+.btn-next{flex:1;padding:14px 24px;background:var(--bg3);border:1.5px solid var(--border);border-radius:100px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;color:var(--txt3);cursor:pointer;transition:all .25s;opacity:.5;}
+.btn-next.ready{opacity:1;background:var(--gradient);color:#fff;border-color:transparent;box-shadow:0 4px 20px rgba(124,110,230,.35);}
+.btn-next.ready:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(124,110,230,.5);}
+
+/* ═══ PROCESSING ═══ */
+#s-process{background:var(--process-bg);align-items:center;justify-content:center;text-align:center;padding:40px;}
+.proc-inner{max-width:360px;}
+.proc-ring{width:72px;height:72px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:spin 1s linear infinite;margin:0 auto 28px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-inner h2{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--txt);margin-bottom:10px;letter-spacing:-.5px;}
+.proc-inner p{font-size:14px;color:var(--txt3);line-height:1.65;margin-bottom:32px;}
+.proc-steps{display:flex;flex-direction:column;gap:10px;text-align:left;}
+.p-step{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--txt3);padding:10px 14px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);}
+.p-step.done{color:var(--green);}
+.p-step.done .pico{color:var(--green);}
+.pico{font-size:14px;width:20px;flex-shrink:0;}
+
+/* ═══ CRISIS ═══ */
+#s-crisis{background:var(--crisis-bg);align-items:center;justify-content:center;text-align:center;padding:40px;}
+.crisis-inner{max-width:400px;}
+.crisis-icon{font-size:52px;margin-bottom:20px;}
+.crisis-inner h2{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#F0EFF8;margin-bottom:14px;letter-spacing:-.5px;}
+.crisis-inner p{font-size:15px;color:rgba(240,239,248,.6);line-height:1.7;margin-bottom:28px;}
+.crisis-line{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-lg);padding:22px;margin-bottom:16px;}
+.crisis-line h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:rgba(240,239,248,.5);margin-bottom:10px;letter-spacing:.3px;}
+.cl-number{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#F0EFF8;letter-spacing:-.5px;}
+.btn-crisis-continue{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(240,239,248,.7);padding:13px 30px;border-radius:100px;font-family:'Manrope',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-crisis-continue:hover{background:rgba(255,255,255,.15);color:#F0EFF8;}
+
+/* ═══ RESULTS ═══ */
+#s-result{background:var(--bg);overflow-x:hidden;}
+.res-hero{background:var(--result-hero-bg);padding:36px 24px 40px;text-align:center;position:relative;overflow:hidden;}
+[data-theme="light"] .res-hero{background:var(--result-hero-bg);}
+.res-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 50% 0%,rgba(124,110,230,.3),transparent 70%);}
+.res-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:100px;font-size:12px;font-weight:600;margin-bottom:24px;position:relative;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);}
+.bdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.bh .bdot{background:var(--green);}
+.bm .bdot{background:var(--amber);}
+.bs .bdot{background:var(--rose);}
+.risk-ring-wrap{position:relative;margin:0 auto 24px;}
+.risk-ring-container{position:relative;width:160px;margin:0 auto;}
+.risk-ring-svg{transform:rotate(-90deg);}
+.risk-ring-track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:10;}
+.risk-ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .5s;}
+.risk-ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.risk-pct-label{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:#fff;line-height:1;}
+.risk-pct-sub{font-size:10px;color:rgba(255,255,255,.4);font-weight:600;margin-top:4px;letter-spacing:.5px;}
+#s-result .res-hero h2{font-family:'Syne',sans-serif;font-size:clamp(20px,4vw,26px);font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:10px;}
+#s-result .res-hero p{font-size:14px;color:rgba(255,255,255,.55);line-height:1.65;max-width:420px;margin:0 auto;}
+.scores-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:20px 16px;max-width:680px;margin:0 auto;}
+@media(max-width:560px){.scores-panel{grid-template-columns:1fr;}}
+.score-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;text-align:center;}
+.sc-icon{font-size:24px;margin-bottom:8px;}
+.sc-label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--txt3);margin-bottom:12px;}
+.sc-score{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--txt);}
+.sc-max{font-size:14px;color:var(--txt3);}
+.sc-pct{font-size:12px;color:var(--txt3);font-weight:600;margin:4px 0 10px;}
+.sc-bar-track{height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.sc-bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1);}
+.sc-sev{font-size:11px;font-weight:600;color:var(--txt3);padding:4px 10px;border-radius:100px;background:var(--bg3);border:1px solid var(--border);display:inline-block;}
+.sev-min,.sev-low{color:var(--green)!important;}
+.sev-mild{color:var(--amber)!important;}
+.sev-mod,.sev-high,.sev-msev,.sev-sev{color:var(--rose)!important;}
+
+.res-body{padding:0 16px 40px;max-width:680px;margin:0 auto;width:100%;}
+.res-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;scrollbar-width:none;}
+.res-tabs::-webkit-scrollbar{display:none;}
+.res-tab{padding:14px 18px;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+.res-tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+.res-tab:hover{color:var(--txt);}
+.tab-pane{display:none;}
+.tab-pane.on{display:block;}
+.rec-heading{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--txt);margin-bottom:16px;letter-spacing:-.3px;}
+.rec-card{display:flex;align-items:flex-start;gap:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:12px;}
+.rec-ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.ic-g{background:rgba(61,220,151,.15);border:1px solid rgba(61,220,151,.2);}
+.ic-b{background:rgba(91,142,240,.15);border:1px solid rgba(91,142,240,.2);}
+.ic-o{background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.2);}
+.ic-r{background:rgba(240,92,92,.15);border:1px solid rgba(240,92,92,.2);}
+.rec-text h4{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--txt);margin-bottom:6px;letter-spacing:-.2px;}
+.rec-text p{font-size:13px;color:var(--txt2);line-height:1.65;}
+.res-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+.btn-action{padding:12px 22px;border-radius:100px;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;background:var(--bg3);border:1.5px solid var(--border);color:var(--txt2);}
+.btn-action:hover{background:var(--bg4);color:var(--txt);}
+.btn-action.primary{background:var(--gradient);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(124,110,230,.3);}
+.btn-action.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,110,230,.45);}
+.crisis-bar{background:rgba(240,92,92,.08);border-top:1px solid rgba(240,92,92,.15);padding:16px 24px;font-size:13px;color:var(--rose);text-align:center;line-height:1.6;}
+
+/* Share card */
+.share-card-preview{background:linear-gradient(135deg,#1A1235,#0D1524);border-radius:20px;padding:28px;margin-bottom:20px;}
+.share-scores{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.share-score-item{text-align:center;}
+.share-score-item .v{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;}
+.share-score-item .l{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px;}
+.share-date{font-size:12px;color:rgba(255,255,255,.3);}
+.sc-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-size:11px;font-weight:600;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);}
+#share-canvas{display:none;}
+
+/* ═══ AI CHAT ═══ */
+#s-chat{background:var(--chat-bg);}
+.chat-wrap{flex:1;display:flex;flex-direction:column;max-width:760px;width:100%;margin:0 auto;padding:16px 16px 0;}
+.chat-context{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;}
+.chat-ctx-scores{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.ctx-chip{padding:4px 10px;border-radius:100px;background:var(--mist);border:1px solid rgba(124,110,230,.2);font-size:11px;font-weight:600;color:var(--accent);}
+.chat-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.sug-chip{padding:8px 14px;border-radius:100px;background:var(--bg3);border:1px solid var(--border);font-size:12px;font-weight:500;color:var(--txt2);cursor:pointer;transition:all .2s;}
+.sug-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--mist);}
+.chat-messages{flex:1;overflow-y:auto;padding:0 0 16px;display:flex;flex-direction:column;gap:12px;min-height:200px;}
+.msg{padding:14px 18px;border-radius:16px;font-size:14px;line-height:1.65;max-width:80%;}
+.msg.user{background:var(--msg-user-bg);color:#fff;align-self:flex-end;border-radius:16px 16px 4px 16px;}
+.msg.ai{background:var(--msg-ai-bg);color:var(--txt);border:1px solid var(--border);align-self:flex-start;border-radius:4px 16px 16px 16px;}
+.typing-dots{display:flex;gap:5px;padding:4px 0;}
+.typing-dots span{width:8px;height:8px;border-radius:50%;background:var(--txt3);animation:typingBounce 1.2s ease-in-out infinite;}
+.typing-dots span:nth-child(2){animation-delay:.2s;}
+.typing-dots span:nth-child(3){animation-delay:.4s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+.chat-input-row{padding:12px 0;display:flex;gap:10px;align-items:flex-end;border-top:1px solid var(--border);}
+.chat-input{flex:1;padding:13px 16px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r);font-family:'Manrope',sans-serif;font-size:14px;color:var(--txt);resize:none;outline:none;transition:var(--trans);}
+.chat-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,110,230,.12);}
+.btn-send{width:44px;height:44px;border-radius:12px;background:var(--gradient);border:none;color:#fff;font-size:16px;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.btn-send:hover{transform:scale(1.05);}
+
+/* ═══ MOOD ═══ */
+#s-mood{background:var(--bg);}
+.mood-body{flex:1;padding:28px 24px 60px;max-width:680px;margin:0 auto;width:100%;}
+.mood-checkin{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-xl);padding:24px;margin-bottom:28px;}
+.mood-checkin h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--txt);margin-bottom:20px;letter-spacing:-.3px;}
+.slider-group{display:flex;flex-direction:column;gap:20px;margin-bottom:20px;}
+.slider-item{display:flex;flex-direction:column;gap:8px;}
+.slider-label{display:flex;justify-content:space-between;align-items:center;}
+.slider-name{font-size:14px;font-weight:600;color:var(--txt2);}
+.slider-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--accent);}
+input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:3px;background:var(--border);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--gradient);cursor:pointer;box-shadow:0 2px 8px rgba(124,110,230,.4);}
+.mood-note{width:100%;padding:12px 16px;background:var(--input-bg);border:1.5px solid var(--input-border);border-radius:var(--r);font-family:'Manrope',sans-serif;font-size:13px;color:var(--txt);resize:vertical;min-height:80px;outline:none;transition:var(--trans);}
+.mood-note:focus{border-color:var(--accent);}
+.btn-log-mood{width:100%;padding:15px;background:var(--gradient);color:#fff;font-family:'Manrope',sans-serif;font-size:15px;font-weight:700;border:none;border-radius:var(--r);cursor:pointer;transition:all .25s;margin-top:14px;box-shadow:0 4px 16px rgba(124,110,230,.3);}
+.btn-log-mood:hover{transform:translateY(-2px);}
+.mood-history h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--txt);margin-bottom:14px;letter-spacing:-.3px;}
+.mood-empty{text-align:center;font-size:14px;color:var(--txt3);padding:28px;background:var(--bg3);border-radius:var(--r);}
+.mood-entry{display:flex;align-items:flex-end;gap:14px;background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:10px;}
+.mood-entry-bars{display:flex;align-items:flex-end;gap:4px;height:48px;}
+.mbar{width:10px;border-radius:3px 3px 0 0;}
+.mood-entry-meta{flex:1;}
+.mood-entry-date{font-size:12px;font-weight:600;color:var(--txt3);margin-bottom:4px;}
+.mood-entry-values{font-size:13px;color:var(--txt2);font-weight:500;}
+.mood-entry-note{font-size:12px;color:var(--txt3);font-style:italic;margin-top:4px;}
+
+/* ═══ DASHBOARD ═══ */
+#s-dash{background:var(--bg);}
+.dash-body{flex:1;padding:24px 24px 60px;max-width:680px;margin:0 auto;width:100%;}
+.dash-hero{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-xl);padding:28px;margin-bottom:20px;}
+.dash-hero h2{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--txt);margin-bottom:8px;letter-spacing:-.5px;}
+.dash-hero p{font-size:14px;color:var(--txt3);margin-bottom:20px;}
+.dash-stats{display:flex;gap:16px;}
+.dash-stat{flex:1;text-align:center;background:var(--bg3);border-radius:var(--r);padding:16px;}
+.ds-val{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;color:var(--accent);}
+.ds-lbl{font-size:11px;font-weight:600;color:var(--txt3);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;}
+.trend-panel{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-xl);padding:24px;margin-bottom:20px;}
+.trend-panel h4{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--txt);margin-bottom:14px;letter-spacing:-.2px;}
+.trend-chart{min-height:100px;}
+.trend-empty{font-size:13px;color:var(--txt3);text-align:center;padding:24px;}
+.trend-svg{width:100%;height:auto;}
+.section-heading{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--txt);margin-bottom:12px;letter-spacing:-.2px;}
+.history-card{background:var(--card-bg);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:10px;}
+.hc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.hc-date{font-size:12px;color:var(--txt3);font-weight:500;}
+.hc-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;font-size:11px;font-weight:700;background:var(--bg3);color:var(--txt2);}
+.hc-badge.bh{color:var(--green);}
+.hc-badge.bm{color:var(--amber);}
+.hc-badge.bs{color:var(--rose);}
+.hc-scores{display:flex;flex-wrap:wrap;gap:6px;}
+.hc-score-chip{padding:4px 10px;border-radius:100px;background:var(--bg3);border:1px solid var(--border);font-size:11px;color:var(--txt3);font-weight:600;}
+.dash-empty{text-align:center;padding:32px;background:var(--bg3);border-radius:var(--r-lg);}
+.dash-empty p{font-size:14px;color:var(--txt3);margin-bottom:16px;}
+
+/* ═══ BREATHING ═══ */
+#s-breathe{background:var(--bg);align-items:center;justify-content:center;text-align:center;padding:40px;}
+.breathe-inner{max-width:360px;}
+.breathe-inner h2{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--txt);margin-bottom:10px;letter-spacing:-.5px;}
+.breathe-inner p{font-size:14px;color:var(--txt3);line-height:1.65;margin-bottom:36px;}
+.breathe-circle-wrap{margin-bottom:24px;}
+.breathe-ring{width:160px;height:160px;border-radius:50%;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;margin:0 auto;position:relative;transition:all 4s ease-in-out;}
+.breathe-ring.expand{border-color:var(--accent);box-shadow:0 0 0 20px rgba(124,110,230,.08),0 0 0 40px rgba(124,110,230,.04);transform:scale(1.25);}
+.breathe-ring.hold{border-color:var(--green);box-shadow:0 0 0 20px rgba(61,220,151,.08);}
+.breathe-ring.shrink{transform:scale(0.85);border-color:var(--accent2);}
+.breathe-inner-dot{width:24px;height:24px;border-radius:50%;background:var(--gradient);}
+.breathe-label{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--txt);margin-bottom:4px;}
+.breathe-count{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;color:var(--accent);line-height:1;}
+.breathe-phase{font-size:13px;color:var(--txt3);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+.breathe-cycles{font-size:12px;color:var(--txt3);margin-bottom:28px;}
+.btn-breathe-stop{background:transparent;border:none;color:var(--txt3);font-family:'Manrope',sans-serif;font-size:13px;cursor:pointer;text-decoration:underline;margin-top:8px;}
+
+@media(max-width:600px){.res-actions{flex-direction:column;}.btn-action{text-align:center;}}
+</style>
+</head>
+<body>
+
+<!-- ══ ONBOARDING SLIDES ══ -->
+<div id="s-onboard" class="screen active">
+  <button class="ob-theme-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">&#9788;</button>
+  <div class="ob-slides" id="ob-slides">
+
+    <!-- SLIDE 1 -->
+    <div class="ob-slide ob-slide-1">
+      <div class="ob-s1-glow1"></div><div class="ob-s1-glow2"></div>
+      <div class="ob-content" id="ob-c1">
+        <div class="ob-icon-wrap ob-icon-1">🧠</div>
+        <div class="ob-eyebrow">Mental Health Matters</div>
+        <h1 class="ob-title">
+          Your mind deserves
+          <span class="hi">care &amp; attention</span>
+        </h1>
+        <p class="ob-body">1 in 4 university students in Nigeria experience significant psychological distress — yet only 1 in 10 ever seek help. You are not alone, and support is available.</p>
+        <div class="ob-stats-row">
+          <div class="ob-stat"><div class="ob-stat-n">1 in 4</div><div class="ob-stat-l">Students affected</div></div>
+          <div class="ob-stat"><div class="ob-stat-n">78%</div><div class="ob-stat-l">Never seek help</div></div>
+          <div class="ob-stat"><div class="ob-stat-n">100%</div><div class="ob-stat-l">Anonymous</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="ob-slide ob-slide-2">
+      <div class="ob-s2-glow1"></div><div class="ob-s2-glow2"></div>
+      <div class="ob-content" id="ob-c2">
+        <div class="ob-icon-wrap ob-icon-2">🔬</div>
+        <div class="ob-eyebrow">Clinically Validated</div>
+        <h1 class="ob-title">
+          Science-backed
+          <span class="hi">assessment tools</span>
+        </h1>
+        <p class="ob-body">MindBridge uses three internationally validated instruments used by clinicians and researchers worldwide to screen for depression, anxiety, and stress.</p>
+        <div class="ob-tag-row">
+          <span class="ob-tag">PHQ-9 · Depression</span>
+          <span class="ob-tag">GAD-7 · Anxiety</span>
+          <span class="ob-tag">PSS-10 · Stress</span>
+          <span class="ob-tag">AI-Powered Analysis</span>
+          <span class="ob-tag">8–10 Minutes</span>
+          <span class="ob-tag">26 Questions</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="ob-slide ob-slide-3">
+      <div class="ob-s3-glow1"></div><div class="ob-s3-glow2"></div>
+      <div class="ob-content" id="ob-c3">
+        <div class="ob-icon-wrap ob-icon-3">🤝</div>
+        <div class="ob-eyebrow">Your Privacy is Sacred</div>
+        <h1 class="ob-title">
+          Private, safe &amp;
+          <span class="hi">judgment-free</span>
+        </h1>
+        <p class="ob-body">No names. No student IDs. No institutional data sharing. Your responses are completely anonymous and stored only on your device. This is your space to be honest.</p>
+        <div class="ob-stats-row">
+          <div class="ob-stat"><div class="ob-stat-n">0</div><div class="ob-stat-l">Data collected</div></div>
+          <div class="ob-stat"><div class="ob-stat-n">∞</div><div class="ob-stat-l">AI support</div></div>
+          <div class="ob-stat"><div class="ob-stat-n">24/7</div><div class="ob-stat-l">Available</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Dots + Buttons -->
+  <div class="ob-nav">
+    <div class="ob-swipe-hint">← swipe to navigate →</div>
+    <div class="ob-dots">
+      <div class="ob-dot on" onclick="goToSlide(0)"></div>
+      <div class="ob-dot" onclick="goToSlide(1)"></div>
+      <div class="ob-dot" onclick="goToSlide(2)"></div>
+    </div>
+    <div class="ob-btns">
+      <button class="btn-ob-skip" onclick="goTo('s-land')">Skip</button>
+      <button class="btn-ob-next" id="btn-ob-next" onclick="obNext()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LANDING ══ -->
+<div id="s-land" class="screen">
+  <button class="btn-theme theme-toggle land-theme-btn" onclick="toggleTheme()" title="Toggle theme">&#9788;</button>
+  <div class="land-glow1"></div><div class="land-glow2"></div>
+  <div class="land-inner">
+    <div class="logo-mark">🧠</div>
+    <h1>Mind<span class="grad">Bridge</span></h1>
+    <p class="land-tagline">An AI-driven mental health support system<br>for Nigerian university students</p>
+    <div class="trust-row">
+      <div class="trust-pill"><span class="tpd"></span>Completely Confidential</div>
+      <div class="trust-pill"><span class="tpd"></span>Anonymous &amp; Voluntary</div>
+      <div class="trust-pill"><span class="tpd"></span>Not a Clinical Diagnosis</div>
+    </div>
+    <div class="land-actions">
+      <button class="btn-start" onclick="goTo('s-demo')">Begin Assessment &nbsp;→</button>
+      <button class="btn-dashboard" onclick="goTo('s-dash')">📊 View My Dashboard</button>
+    </div>
+    <p class="land-sub">Takes approximately 8–10 minutes &nbsp;·&nbsp; 26 questions across 3 validated instruments</p>
+    <div class="instruments-note">
+      <span class="inst-tag">PHQ-9 — Depression</span>
+      <span class="inst-tag">GAD-7 — Anxiety</span>
+      <span class="inst-tag">PSS-10 — Perceived Stress</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DEMOGRAPHICS ══ -->
+<div id="s-demo" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand"><span class="brand-dot"></span> MindBridge</div>
+    <div class="topbar-actions">
+      <button class="btn-back-top" onclick="goTo('s-land')">← Back</button>
+      <button class="btn-theme theme-toggle" onclick="toggleTheme()" title="Toggle theme">&#9788;</button>
+    </div>
+  </div>
+  <div class="page-body">
+    <div class="page-header">
+      <h2>Tell us about yourself</h2>
+      <p>Fields marked <span style="color:var(--rose)">*</span> are required. All others are optional.</p>
+    </div>
+    <div class="anon-strip"><span>🔒</span><span>No personally identifying information is collected. Your responses are completely anonymous.</span></div>
+    <div class="form-section">
+      <div class="form-section-title">Personal Information</div>
+      <div class="form-grid">
+        <div class="field"><label class="f-label">Age <span class="req">*</span></label><input class="f-input" id="d-age" type="number" min="16" max="60" placeholder="e.g. 21" oninput="checkDemo()"></div>
+        <div class="field"><label class="f-label">Gender <span class="req">*</span></label>
+          <select class="f-select" id="d-gender" onchange="checkDemo()"><option value="">Select gender</option><option>Male</option><option>Female</option><option>Non-binary / Other</option><option>Prefer not to say</option></select></div>
+        <div class="field full"><label class="f-label">State of Origin</label>
+          <select class="f-select" id="d-state"><option value="">Select state (optional)</option><option>Abia</option><option>Adamawa</option><option>Akwa Ibom</option><option>Anambra</option><option>Bauchi</option><option>Bayelsa</option><option>Benue</option><option>Borno</option><option>Cross River</option><option>Delta</option><option>Ebonyi</option><option>Edo</option><option>Ekiti</option><option>Enugu</option><option>FCT – Abuja</option><option>Gombe</option><option>Imo</option><option>Jigawa</option><option>Kaduna</option><option>Kano</option><option>Katsina</option><option>Kebbi</option><option>Kogi</option><option>Kwara</option><option>Lagos</option><option>Nasarawa</option><option>Niger</option><option>Ogun</option><option>Ondo</option><option>Osun</option><option>Oyo</option><option>Plateau</option><option>Rivers</option><option>Sokoto</option><option>Taraba</option><option>Yobe</option><option>Zamfara</option></select></div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">Academic Information</div>
+      <div class="form-grid">
+        <div class="field"><label class="f-label">Current Level <span class="req">*</span></label>
+          <select class="f-select" id="d-level" onchange="checkDemo()"><option value="">Select level</option><option>100 Level</option><option>200 Level</option><option>300 Level</option><option>400 Level</option><option>500 Level</option><option>600 Level</option><option>Postgraduate</option></select></div>
+        <div class="field"><label class="f-label">Faculty / College</label>
+          <select class="f-select" id="d-faculty"><option value="">Select (optional)</option><option>Engineering &amp; Technology</option><option>Sciences</option><option>Medicine &amp; Health Sciences</option><option>Arts &amp; Humanities</option><option>Social Sciences</option><option>Law</option><option>Education</option><option>Agriculture</option><option>Management Sciences</option><option>Other</option></select></div>
+        <div class="field"><label class="f-label">CGPA Range</label>
+          <select class="f-select" id="d-cgpa"><option value="">Select (optional)</option><option>4.50–5.00 (First Class)</option><option>3.50–4.49 (Second Class Upper)</option><option>2.40–3.49 (Second Class Lower)</option><option>1.50–2.39 (Third Class)</option><option>Below 1.50</option><option>Prefer not to say</option></select></div>
+        <div class="field"><label class="f-label">Accommodation</label>
+          <select class="f-select" id="d-accom"><option value="">Select (optional)</option><option>On-campus hostel</option><option>Off-campus (alone)</option><option>Off-campus (with others)</option><option>With family at home</option></select></div>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="form-section-title">Background</div>
+      <div class="field" style="margin-bottom:18px;"><label class="f-label">Have you ever sought mental health support?</label>
+        <div class="pill-group" id="pg-support">
+          <div class="r-pill" onclick="pickPill('pg-support',this)">Yes — professional</div>
+          <div class="r-pill" onclick="pickPill('pg-support',this)">Yes — informally</div>
+          <div class="r-pill" onclick="pickPill('pg-support',this)">No</div>
+          <div class="r-pill" onclick="pickPill('pg-support',this)">Prefer not to say</div>
+        </div>
+      </div>
+      <div class="field"><label class="f-label">Primary financial support</label>
+        <select class="f-select" id="d-finance"><option value="">Select (optional)</option><option>Parents / Family</option><option>Scholarship / Bursary</option><option>Personal income / Part-time work</option><option>Government funding</option><option>Mixed sources</option><option>Prefer not to say</option></select></div>
+    </div>
+    <button class="btn-primary-full" id="btn-demo" onclick="startQuiz()">Continue to Assessment →</button>
+  </div>
+</div>
+
+<!-- ══ QUIZ ══ -->
+<div id="s-quiz" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand"><span class="brand-dot"></span> MindBridge</div>
+    <div class="topbar-actions">
+      <div class="topbar-meta"><strong>Step 2 of 2</strong><br><span id="tb-counter">Question 1 of 26</span></div>
+      <button class="btn-theme theme-toggle" onclick="toggleTheme()" title="Toggle theme">&#9788;</button>
+    </div>
+  </div>
+  <div class="quiz-body">
+    <div class="prog-wrap">
+      <div class="prog-top"><span class="prog-label" id="prog-label">PHQ-9 — Depression</span><span class="prog-frac" id="prog-frac">1 / 26</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:4%"></div></div>
+    </div>
+    <div class="inst-header" id="inst-header">
+      <div><div class="inst-name" id="inst-name">PHQ-9 — Depression Screening</div><div class="inst-timeframe" id="inst-tf"></div></div>
+      <div class="inst-count" id="inst-count">Q 1/9</div>
+    </div>
+    <div class="q-card" id="q-card">
+      <div class="q-card-top"><div class="q-num" id="q-num">ITEM 1</div><div class="q-text" id="q-text"></div></div>
+      <div id="item9-warn" class="item9-warn" style="display:none;">⚠️ If you are experiencing thoughts of self-harm, please reach out immediately.<br><strong>Crisis Helpline: 0800-PREVENT (0800-7738368)</strong></div>
+      <div class="options-wrap"><div class="opt-scale" id="opt-grid"></div></div>
+    </div>
+    <div class="q-nav">
+      <button class="btn-back" id="btn-back" onclick="prevQ()">← Back</button>
+      <button class="btn-next" id="btn-next" onclick="nextQ()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PROCESSING ══ -->
+<div id="s-process" class="screen">
+  <div class="proc-inner">
+    <div class="proc-ring"></div>
+    <h2>Scoring your responses…</h2>
+    <p>Applying validated clinical scoring algorithms and generating your personalised report.</p>
+    <div class="proc-steps">
+      <div class="p-step done"><span class="pico">✓</span> PHQ-9 responses encoded</div>
+      <div class="p-step done"><span class="pico">✓</span> GAD-7 responses encoded</div>
+      <div class="p-step done"><span class="pico">✓</span> PSS-10 responses encoded</div>
+      <div class="p-step" id="ps4"><span class="pico">⟳</span> Running Random Forest classifier</div>
+      <div class="p-step" id="ps5"><span class="pico">◌</span> Generating personalised recommendations</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CRISIS ══ -->
+<div id="s-crisis" class="screen">
+  <div class="crisis-inner">
+    <div class="crisis-icon">💚</div>
+    <h2>We noticed something important</h2>
+    <p>Your response to one of the questions indicates you may be having thoughts of self-harm. That took courage to acknowledge. You are not alone — and help is available right now.</p>
+    <div class="crisis-line">
+      <h3>Nigerian Suicide Prevention Helpline</h3>
+      <div class="cl-number">0800-PREVENT<br><span style="font-size:18px;opacity:.7">(0800-7738368)</span></div>
+      <p style="font-size:13px;color:rgba(246,241,234,.4);margin-top:10px;">Free · Confidential · Available 24 hours a day, 7 days a week</p>
+    </div>
+    <div class="crisis-line" style="margin-bottom:28px;">
+      <h3>Mentally Aware Nigeria Initiative (MANI)</h3>
+      <div class="cl-number" style="font-size:22px;">08091116264</div>
+    </div>
+    <p style="font-size:13px;color:rgba(246,241,234,.4);margin-bottom:20px;">Please consider reaching out before continuing. Your wellbeing matters more than this assessment.</p>
+    <button class="btn-crisis-continue" onclick="continueFromCrisis()">Continue to my results →</button>
+  </div>
+</div>
+
+<!-- ══ RESULTS ══ -->
+<div id="s-result" class="screen">
+  <div style="position:sticky;top:0;z-index:100;background:var(--topbar);border-bottom:1px solid var(--topbar-border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;">
+    <div class="topbar-brand"><span class="brand-dot"></span> Results</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn-back-top" onclick="goTo('s-land')">← Home</button>
+      <button class="btn-theme theme-toggle" onclick="toggleTheme()">&#9788;</button>
+    </div>
+  </div>
+  <div class="res-hero">
+    <div class="res-badge" id="res-badge"><span class="bdot" id="bdot"></span><span id="blabel">Result</span></div>
+    <div class="risk-ring-wrap">
+      <div class="risk-ring-container">
+        <svg class="risk-ring-svg" width="160" height="160" viewBox="0 0 160 160">
+          <circle class="risk-ring-track" cx="80" cy="80" r="70"/>
+          <circle class="risk-ring-fill" id="ring-fill" cx="80" cy="80" r="70" stroke-dasharray="439.82" stroke-dashoffset="439.82"/>
+        </svg>
+        <div class="risk-ring-inner"><div class="risk-pct-label" id="ring-pct">0%</div><div class="risk-pct-sub">Risk Score</div></div>
+      </div>
+    </div>
+    <h2 id="res-h2">Your Assessment Result</h2>
+    <p id="res-p"></p>
+  </div>
+
+  <div class="scores-panel">
+    <div class="score-card"><div class="sc-icon">😔</div><div class="sc-label">Depression</div><div><span class="sc-score" id="phq-score">—</span><span class="sc-max">/27</span></div><div class="sc-pct" id="phq-pct"></div><div class="sc-bar-track"><div class="sc-bar-fill" id="phq-bar" style="width:0%"></div></div><div class="sc-sev" id="phq-sev"></div></div>
+    <div class="score-card"><div class="sc-icon">😰</div><div class="sc-label">Anxiety</div><div><span class="sc-score" id="gad-score">—</span><span class="sc-max">/21</span></div><div class="sc-pct" id="gad-pct"></div><div class="sc-bar-track"><div class="sc-bar-fill" id="gad-bar" style="width:0%"></div></div><div class="sc-sev" id="gad-sev"></div></div>
+    <div class="score-card"><div class="sc-icon">🌀</div><div class="sc-label">Perceived Stress</div><div><span class="sc-score" id="pss-score">—</span><span class="sc-max">/40</span></div><div class="sc-pct" id="pss-pct"></div><div class="sc-bar-track"><div class="sc-bar-fill" id="pss-bar" style="width:0%"></div></div><div class="sc-sev" id="pss-sev"></div></div>
+  </div>
+
+  <div class="res-body">
+    <div class="res-tabs">
+      <div class="res-tab on" onclick="switchTab('t-recs',this)">💡 Recommendations</div>
+      <div class="res-tab" onclick="switchTab('t-chat',this)">🤖 Ask AI</div>
+      <div class="res-tab" onclick="switchTab('t-breathe-tab',this)">🌬️ Breathe</div>
+      <div class="res-tab" onclick="switchTab('t-share',this)">📤 Share</div>
+    </div>
+
+    <div id="t-recs" class="tab-pane on">
+      <div class="anon-strip result"><span>🔒</span><span>These results are <strong>completely anonymous</strong> and <strong>not a clinical diagnosis</strong>. They are provided to guide you towards appropriate support.</span></div>
+      <h3 class="rec-heading">Your Personalised Recommendations</h3>
+      <div id="recs"></div>
+      <div class="res-actions">
+        <button class="btn-action primary" onclick="goTo('s-mood')">📅 Log Today's Mood</button>
+        <button class="btn-action" onclick="goTo('s-dash')">📊 View Dashboard</button>
+        <button class="btn-action" onclick="restart()">↺ Retake Assessment</button>
+      </div>
+    </div>
+
+    <div id="t-chat" class="tab-pane">
+      <div style="padding-top:8px;" id="inline-chat-mount"></div>
+    </div>
+
+    <div id="t-breathe-tab" class="tab-pane" style="padding-top:24px;text-align:center;">
+      <h3 class="rec-heading" style="text-align:left">Guided Breathing Exercise</h3>
+      <p style="font-size:14px;color:var(--txt3);margin-bottom:24px;text-align:left;line-height:1.7;">Box breathing (4-4-4-4) activates the parasympathetic nervous system, reduces cortisol, and calms anxiety in 3–5 minutes.</p>
+      <button class="btn-action primary" style="width:100%;margin-bottom:0;" onclick="startBreathe()">🌬️ Start 5-Minute Breathing Session</button>
+    </div>
+
+    <div id="t-share" class="tab-pane" style="padding-top:24px;">
+      <h3 class="rec-heading">Save or Share Your Results</h3>
+      <p style="font-size:14px;color:var(--txt3);margin-bottom:20px;line-height:1.7;">Download your result card to share with a doctor, counsellor, parent, or trusted friend.</p>
+      <div class="share-card-preview" id="share-preview">
+        <div class="sc-badge bh" id="share-badge-el" style="margin-bottom:14px;"></div>
+        <h3 id="share-headline-el" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff;margin-bottom:14px;"></h3>
+        <div class="share-scores" id="share-scores-el"></div>
+        <div class="share-date" id="share-date-el"></div>
+        <p style="font-size:11px;color:rgba(255,255,255,.25);margin-top:12px;">MindBridge · Not a clinical diagnosis</p>
+      </div>
+      <canvas id="share-canvas"></canvas>
+      <div class="res-actions">
+        <button class="btn-action primary" onclick="downloadCard()">⬇️ Download Image</button>
+        <button class="btn-action" onclick="copyResults()">📋 Copy Text Summary</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="crisis-bar">
+    If you are in crisis or having thoughts of self-harm, please reach out immediately.<br>
+    <strong>Nigerian Suicide Prevention Helpline: 0800-PREVENT (0800-7738368) — Available 24/7</strong>
+  </div>
+</div>
+
+<!-- ══ AI CHAT ══ -->
+<div id="s-chat" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand"><span class="brand-dot"></span> MindBridge AI</div>
+    <div class="topbar-actions">
+      <button class="btn-back-top" onclick="goTo('s-result')">← Back to Results</button>
+      <button class="btn-theme theme-toggle" onclick="toggleTheme()">&#9788;</button>
+    </div>
+  </div>
+  <div class="chat-wrap">
+    <div class="chat-context">
+      <span style="font-size:22px;">🤖</span>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:6px;">Your scores are loaded — ask me anything</div>
+      <div class="chat-ctx-scores" id="chat-ctx-chips"></div></div>
+    </div>
+    <div class="chat-suggestions" id="chat-sugs"></div>
+    <div class="chat-messages" id="chat-msgs"></div>
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-in" placeholder="Ask about your results, coping strategies, or what to do next…" rows="1" onkeydown="chatKeydown(event)" oninput="autoResize(this)"></textarea>
+      <button class="btn-send" id="btn-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MOOD ══ -->
+<div id="s-mood" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand"><span class="brand-dot"></span> MindBridge</div>
+    <div class="topbar-actions">
+      <button class="btn-back-top" onclick="goTo('s-result')">← Back</button>
+      <button class="btn-theme theme-toggle" onclick="toggleTheme()">&#9788;</button>
+    </div>
+  </div>
+  <div class="mood-body">
+    <div class="page-header"><h2>Daily Mood Check-in</h2><p>30 seconds. Log how you feel today to track patterns over time.</p></div>
+    <div class="mood-checkin">
+      <h3>How are you right now?</h3>
+      <div class="slider-group">
+        <div class="slider-item">
+          <div class="slider-label"><span class="slider-name">😊 Mood</span><span class="slider-val" id="sl-mood-val">5</span></div>
+          <input type="range" min="1" max="10" value="5" id="sl-mood" oninput="document.getElementById('sl-mood-val').textContent=this.value">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt3);margin-top:4px;"><span>Very Low</span><span>Very High</span></div>
+        </div>
+        <div class="slider-item">
+          <div class="slider-label"><span class="slider-name">⚡ Energy</span><span class="slider-val" id="sl-energy-val">5</span></div>
+          <input type="range" min="1" max="10" value="5" id="sl-energy" oninput="document.getElementById('sl-energy-val').textContent=this.value">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt3);margin-top:4px;"><span>Exhausted</span><span>Full of energy</span></div>
+        </div>
+        <div class="slider-item">
+          <div class="slider-label"><span class="slider-name">🌀 Stress</span><span class="slider-val" id="sl-stress-val">5</span></div>
+          <input type="range" min="1" max="10" value="5" id="sl-stress" oninput="document.getElementById('sl-stress-val').textContent=this.value">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt3);margin-top:4px;"><span>Very calm</span><span>Very stressed</span></div>
+        </div>
+      </div>
+      <textarea class="mood-note" id="mood-note" placeholder="Optional: What's on your mind today? (private note)"></textarea>
+      <button class="btn-log-mood" onclick="logMood()">✓ Log Today's Check-in</button>
+    </div>
+    <div class="mood-history">
+      <h3>Your Check-in History</h3>
+      <div id="mood-history-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="s-dash" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand"><span class="brand-dot"></span> MindBridge</div>
+    <div class="topbar-actions">
+      <button class="btn-back-top" onclick="goTo('s-land')">← Home</button>
+      <button class="btn-theme theme-toggle" onclick="toggleTheme()">&#9788;</button>
+    </div>
+  </div>
+  <div class="dash-body">
+    <div class="dash-hero">
+      <h2>Your Progress Dashboard</h2>
+      <p>Track how your mental health scores change over time.</p>
+      <div class="dash-stats">
+        <div class="dash-stat"><div class="ds-val" id="ds-sessions">0</div><div class="ds-lbl">Assessments</div></div>
+        <div class="dash-stat"><div class="ds-val" id="ds-checkins">0</div><div class="ds-lbl">Check-ins</div></div>
+        <div class="dash-stat"><div class="ds-val" id="ds-trend">—</div><div class="ds-lbl">Trend</div></div>
+      </div>
+    </div>
+    <div class="trend-panel">
+      <h4>Risk Score Trend (Last 10 Assessments)</h4>
+      <div class="trend-chart" id="trend-chart"><div class="trend-empty" id="trend-empty">No assessment history yet. Complete an assessment to see your trend.</div><svg class="trend-svg" id="trend-svg" style="display:none"></svg></div>
+    </div>
+    <p class="section-heading">Assessment History</p>
+    <div id="dash-history"></div>
+    <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn-action primary" onclick="goTo('s-demo')">+ New Assessment</button>
+      <button class="btn-action" onclick="goTo('s-mood')">📅 Mood Check-in</button>
+      <button class="btn-action" onclick="clearHistory()" style="color:var(--rose);border-color:rgba(240,92,92,.3)">🗑 Clear All Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BREATHING ══ -->
+<div id="s-breathe" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand"><span class="brand-dot"></span> Breathe</div>
+    <button class="btn-theme theme-toggle" onclick="toggleTheme()">&#9788;</button>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:40px;">
+    <div class="breathe-inner">
+      <h2>Box Breathing</h2>
+      <p>A clinically proven technique to calm your nervous system. Follow the circle — breathe in, hold, breathe out, hold. Repeat 5 times.</p>
+      <div class="breathe-circle-wrap">
+        <div class="breathe-ring" id="breathe-ring"><div class="breathe-inner-dot"></div></div>
+      </div>
+      <div class="breathe-label" id="breathe-label">Ready</div>
+      <div class="breathe-count" id="breathe-count"></div>
+      <div class="breathe-phase" id="breathe-phase">Press start to begin</div>
+      <div class="breathe-cycles" id="breathe-cycles">Cycle 0 of 5</div>
+      <button class="btn-action primary" id="btn-breathe-start" style="margin:0 auto 16px;width:200px;" onclick="toggleBreathe()">▶ Start</button>
+      <button class="btn-breathe-stop" onclick="exitBreathe()">← Back to Results</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// THEME TOGGLE
+// ═══════════════════════════════════
+function toggleTheme(){
+  const html=document.documentElement;
+  const isDark=html.getAttribute('data-theme')==='dark';
+  const next=isDark?'light':'dark';
+  html.setAttribute('data-theme',next);
+  const icon=next==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';
+  document.querySelectorAll('.theme-toggle').forEach(b=>b.textContent=icon);
+  localStorage.setItem('mb_theme',next);
+}
+(function(){
+  const saved=localStorage.getItem('mb_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',saved);
+  const icon=saved==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';
+  document.querySelectorAll('.theme-toggle').forEach(b=>b.textContent=icon);
+})();
+
+// ═══════════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════════
+let obSlide=0;
+function goToSlide(n){
+  obSlide=n;
+  const slider=document.getElementById('ob-slides');
+  slider.style.transition='transform .6s cubic-bezier(.4,0,.2,1)';
+  slider.style.transform='translateX(-'+(n*33.333)+'%)';
+  document.querySelectorAll('.ob-dot').forEach((d,i)=>d.classList.toggle('on',i===n));
+  const btn=document.getElementById('btn-ob-next');
+  if(n===2){btn.textContent='Get Started';btn.className='btn-ob-start';btn.onclick=function(){goTo('s-land');};}
+  else{btn.textContent='Next \u2192';btn.className='btn-ob-next';btn.onclick=obNext;}
+  const content=document.getElementById('ob-c'+(n+1));
+  if(content){content.style.animation='none';void content.offsetWidth;content.style.animation='obFadeUp .7s ease both';}
+}
+function obNext(){
+  if(obSlide<2)goToSlide(obSlide+1);
+  else goTo('s-land');
+}
+
+// ── Swipe / drag support for onboarding ──
+(function(){
+  const slider=document.getElementById('ob-slides');
+  let startX=0,startY=0,isDragging=false,dragDelta=0,locked=false;
+
+  function onStart(x,y){
+    startX=x; startY=y; isDragging=true; dragDelta=0; locked=false;
+    slider.style.transition='none';
+  }
+  function onMove(x,y){
+    if(!isDragging)return;
+    const dx=x-startX, dy=y-startY;
+    if(!locked){
+      if(Math.abs(dy)>Math.abs(dx)){isDragging=false;slider.style.transition='';return;}
+      locked=true;
+    }
+    dragDelta=dx;
+    const base=obSlide*33.333;
+    const pct=(dragDelta/slider.parentElement.offsetWidth)*100;
+    slider.style.transform='translateX(calc(-'+base+'% + '+dragDelta+'px))';
+  }
+  function onEnd(){
+    if(!isDragging)return;
+    isDragging=false;
+    const threshold=50;
+    if(dragDelta<-threshold&&obSlide<2)goToSlide(obSlide+1);
+    else if(dragDelta>threshold&&obSlide>0)goToSlide(obSlide-1);
+    else goToSlide(obSlide);
+  }
+
+  // Touch
+  slider.addEventListener('touchstart',e=>{const t=e.touches[0];onStart(t.clientX,t.clientY);},{passive:true});
+  slider.addEventListener('touchmove',e=>{const t=e.touches[0];onMove(t.clientX,t.clientY);},{passive:true});
+  slider.addEventListener('touchend',onEnd);
+
+  // Mouse drag
+  slider.addEventListener('mousedown',e=>{onStart(e.clientX,e.clientY);e.preventDefault();});
+  window.addEventListener('mousemove',e=>{if(isDragging)onMove(e.clientX,e.clientY);});
+  window.addEventListener('mouseup',onEnd);
+
+  // Keyboard arrows
+  document.addEventListener('keydown',e=>{
+    if(document.getElementById('s-onboard').classList.contains('active')){
+      if(e.key==='ArrowRight'&&obSlide<2)goToSlide(obSlide+1);
+      if(e.key==='ArrowLeft'&&obSlide>0)goToSlide(obSlide-1);
+    }
+  });
+})();
+
+// ═══════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='s-mood')setTimeout(renderMoodHistory,50);
+  if(id==='s-dash')setTimeout(renderDashboard,50);
+  // Update theme icons after navigation
+  const saved=document.documentElement.getAttribute('data-theme')||'dark';
+  const icon=saved==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';
+  document.querySelectorAll('.theme-toggle').forEach(b=>b.textContent=icon);
+}
+function restart(){cur=0;ans=new Array(TOTAL).fill(null);crisisTriggered=false;renderQ();goTo('s-demo');}
+function switchTab(id,el){document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.res-tab').forEach(t=>t.classList.remove('on'));document.getElementById(id).classList.add('on');el.classList.add('on');if(id==='t-chat')mountInlineChat();}
+
+// ═══════════════════════════════════
+// INSTRUMENTS
+// ═══════════════════════════════════
+const INSTRUMENTS = {
+  phq:{name:'PHQ-9 — Depression Screening',timeframe:'Over the <em>last 2 weeks</em>, how often have you been bothered by:',
+    options:[{value:0,label:'Not at all',sub:'0 days in the past 2 weeks'},{value:1,label:'Several days',sub:'1–6 days'},{value:2,label:'More than half the days',sub:'7–11 days'},{value:3,label:'Nearly every day',sub:'12–14 days'}],
+    questions:[{text:'Little interest or pleasure in doing things'},{text:'Feeling down, depressed, or hopeless'},{text:'Trouble falling or staying asleep, or sleeping too much'},{text:'Feeling tired or having little energy'},{text:'Poor appetite or overeating'},{text:'Feeling bad about yourself — or that you are a failure, or have let yourself or your family down'},{text:'Trouble concentrating on things, such as reading or watching television'},{text:'Moving or speaking so slowly that other people could have noticed — or being so fidgety or restless that you have been moving around a lot more than usual'},{text:'Thoughts that you would be better off dead, or thoughts of hurting yourself in some way',item9:true}]},
+  gad:{name:'GAD-7 — Anxiety Screening',timeframe:'Over the <em>last 2 weeks</em>, how often have you been bothered by:',
+    options:[{value:0,label:'Not at all',sub:'0 days in the past 2 weeks'},{value:1,label:'Several days',sub:'1–6 days'},{value:2,label:'More than half the days',sub:'7–11 days'},{value:3,label:'Nearly every day',sub:'12–14 days'}],
+    questions:[{text:'Feeling nervous, anxious, or on edge'},{text:'Not being able to stop or control worrying'},{text:'Worrying too much about different things'},{text:'Trouble relaxing'},{text:'Being so restless that it is hard to sit still'},{text:'Becoming easily annoyed or irritable'},{text:'Feeling afraid, as if something awful might happen'}]},
+  pss:{name:'PSS-10 — Perceived Stress Scale',timeframe:'In the <em>last month</em>, how often have you felt or thought the following?',
+    options:[{value:0,label:'Never',sub:'This has not happened'},{value:1,label:'Almost never',sub:'Very rarely'},{value:2,label:'Sometimes',sub:'Occasionally'},{value:3,label:'Fairly often',sub:'Regularly'},{value:4,label:'Very often',sub:'Most of the time'}],
+    questions:[{text:'Been upset because of something that happened unexpectedly?'},{text:'Felt that you were unable to control the important things in your life?'},{text:'Felt nervous and stressed?'},{text:'Felt confident about your ability to handle your personal problems?',reverse:true},{text:'Felt that things were going your way?',reverse:true},{text:'Found that you could not cope with all the things that you had to do?'},{text:'Been able to control irritations in your life?',reverse:true},{text:'Felt that you were on top of things?',reverse:true},{text:'Been angered because of things that were outside of your control?'},{text:'Felt difficulties were piling up so high that you could not overcome them?'}]}
+};
+const ALL_QS=[];['phq','gad','pss'].forEach(k=>{INSTRUMENTS[k].questions.forEach((q,i)=>{ALL_QS.push({inst:k,localIdx:i,...q,options:INSTRUMENTS[k].options,reverse:q.reverse||false,item9:q.item9||false});});});
+const TOTAL=ALL_QS.length;
+
+let cur=0, ans=new Array(TOTAL).fill(null);
+let lastResult=null;
+let crisisTriggered=false;
+let chatHistory=[];
+
+// ═══════════════════════════════════
+// DEMOGRAPHICS
+// ═══════════════════════════════════
+function pickPill(g,el){document.querySelectorAll('#'+g+' .r-pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');}
+function checkDemo(){const age=parseInt(document.getElementById('d-age').value);const gender=document.getElementById('d-gender').value;const level=document.getElementById('d-level').value;document.getElementById('btn-demo').classList.toggle('ready',age>=16&&age<=60&&!!gender&&!!level);}
+function startQuiz(){renderQ();goTo('s-quiz');}
+
+// ═══════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════
+function renderQ(){
+  const q=ALL_QS[cur];const inst=INSTRUMENTS[q.inst];const pct=Math.round(((cur+1)/TOTAL)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').innerHTML=inst.name;
+  document.getElementById('prog-frac').textContent=(cur+1)+' / '+TOTAL;
+  document.getElementById('tb-counter').textContent='Question '+(cur+1)+' of '+TOTAL;
+  document.getElementById('inst-name').innerHTML=inst.name;
+  document.getElementById('inst-tf').innerHTML=inst.timeframe;
+  document.getElementById('inst-count').textContent='Q '+(q.localIdx+1)+'/'+inst.questions.length;
+  document.getElementById('q-num').textContent='ITEM '+(q.localIdx+1);
+  document.getElementById('q-text').innerHTML=q.text+(q.reverse?' <em style="font-size:.85em;color:var(--txt3)">(positive item)</em>':'');
+  document.getElementById('item9-warn').style.display=q.item9?'flex':'none';
+  document.getElementById('btn-back').style.visibility=cur===0?'hidden':'visible';
+  const grid=document.getElementById('opt-grid');grid.innerHTML='';
+  q.options.forEach(opt=>{const sel=ans[cur]===opt.value;const btn=document.createElement('button');btn.className='opt-btn'+(sel?' on':'');btn.innerHTML=`<div class="opt-circle">${opt.value}</div><div class="opt-main"><div class="opt-main-label">${opt.label}</div><div class="opt-sub">${opt.sub}</div></div><div class="opt-score">${sel?'✓':opt.value+' pt'+(opt.value!==1?'s':'')}</div>`;btn.onclick=()=>{ans[cur]=opt.value;renderQ();};grid.appendChild(btn);});
+  updateNext();
+}
+function updateNext(){const btn=document.getElementById('btn-next');const ready=ans[cur]!==null;btn.classList.toggle('ready',ready);btn.textContent=cur===TOTAL-1?'Submit Results ✓':'Continue →';}
+function nextQ(){if(ans[cur]===null)return;if(cur<TOTAL-1){cur++;renderQ();window.scrollTo(0,0);}else{checkCrisisAndProcess();}}
+function prevQ(){if(cur>0){cur--;renderQ();window.scrollTo(0,0);}}
+
+// ═══════════════════════════════════
+// CRISIS CHECK
+// ═══════════════════════════════════
+function checkCrisisAndProcess(){
+  const phq9answer=ans[8];
+  if(phq9answer>0&&!crisisTriggered){crisisTriggered=true;goTo('s-crisis');}
+  else{processResults();}
+}
+function continueFromCrisis(){processResults();}
+
+// ═══════════════════════════════════
+// SCORING
+// ═══════════════════════════════════
+function processResults(){
+  goTo('s-process');
+  setTimeout(()=>{const s=document.getElementById('ps4');s.classList.add('done');s.querySelector('.pico').textContent='✓';},800);
+  setTimeout(()=>{const s=document.getElementById('ps5');s.classList.add('done');s.querySelector('.pico').textContent='✓';},1600);
+  setTimeout(()=>showResult(),2600);
+}
+
+function showResult(){
+  const phqScore=ALL_QS.filter(q=>q.inst==='phq').reduce((s,q,i)=>s+(ans[i]||0),0);
+  const gadOffset=9;const gadScore=ALL_QS.filter(q=>q.inst==='gad').reduce((s,q,i)=>s+(ans[gadOffset+i]||0),0);
+  const pssOffset=16;let pssScore=0;ALL_QS.filter(q=>q.inst==='pss').forEach((q,i)=>{const raw=ans[pssOffset+i]||0;pssScore+=q.reverse?(4-raw):raw;});
+
+  const phqSev=phqScore<=4?['Minimal Depression','sev-min']:phqScore<=9?['Mild Depression','sev-mild']:phqScore<=14?['Moderate Depression','sev-mod']:phqScore<=19?['Moderately Severe','sev-msev']:['Severe Depression','sev-sev'];
+  const gadSev=gadScore<=4?['Minimal Anxiety','sev-min']:gadScore<=9?['Mild Anxiety','sev-mild']:gadScore<=14?['Moderate Anxiety','sev-mod']:['Severe Anxiety','sev-sev'];
+  const pssSev=pssScore<=13?['Low Stress','sev-low']:pssScore<=26?['Moderate Stress','sev-mild']:['High Stress','sev-high'];
+  const phqCat=phqScore<=4?0:phqScore<=9?1:phqScore<=14?2:3;
+  const gadCat=gadScore<=4?0:gadScore<=9?1:gadScore<=14?2:3;
+  const pssCat=pssScore<=13?0:pssScore<=26?1:2;
+  const maxCat=Math.max(phqCat,gadCat,pssCat);
+  const phqPct=Math.round((phqScore/27)*100);const gadPct=Math.round((gadScore/21)*100);const pssPct=Math.round((pssScore/40)*100);
+  const overallPct=Math.round((phqPct+gadPct+pssPct)/3);
+
+  let overallClass,headline,subtext,badgeClass,dotColor,recs;
+  if(maxCat===0){
+    overallClass='Healthy';headline='Your results suggest you are coping well';subtext='Your scores across all three instruments fall within the minimal/low range. Your mental wellbeing appears currently stable.';badgeClass='bh';dotColor='var(--green)';
+    recs=[{ico:'🌿',bg:'ic-g',title:'Maintain Your Wellbeing Routine',body:'Continue habits that protect mental health — regular sleep, physical activity, balanced nutrition, and social connection. Prevention is more effective than cure.'},{ico:'📖',bg:'ic-o',title:'Build Resilience Skills',body:'Consider learning evidence-based stress management techniques such as mindfulness or structured journalling before academic pressure peaks.'},{ico:'🤝',bg:'ic-b',title:'Stay Socially Connected',body:'Social bonds are among the strongest protective factors for mental health. Nurture friendships and stay engaged with your campus community.'}];
+  } else if(maxCat<=2){
+    overallClass='At Risk';headline='Your results indicate some level of distress';subtext='One or more of your scores falls in the mild-to-moderate range. This is common among university students and is very treatable with the right support.';badgeClass='bm';dotColor='var(--amber)';
+    const domInst=phqCat>=gadCat&&phqCat>=pssCat?'depression':gadCat>=pssCat?'anxiety':'stress';
+    recs=[{ico:'💬',bg:'ic-b',title:'Talk to Someone You Trust',body:'Speaking openly about how you feel — with a friend, family member, or campus peer counsellor — can meaningfully reduce anxiety and depressive symptoms.'},{ico:'🏃',bg:'ic-g',title:'Physical Activity',body:'Even 20–30 minutes of moderate exercise daily has strong clinical evidence for reducing both depression and anxiety.'},{ico:'📋',bg:'ic-o',title:'Structure Your Academic Load',body:'Break large tasks into smaller steps. A written daily plan reduces the cognitive weight of academic demands significantly.'},{ico:'🏥',bg:'ic-r',title:'Consider Campus Counselling',body:"Visit your university's student affairs unit or health centre. Brief counselling sessions are typically free, voluntary, and confidential."}];
+    if(domInst==='anxiety') recs.unshift({ico:'🌬️',bg:'ic-g',title:'Try Breathing Exercises',body:'Use the breathing tool in the Breathe tab — 5 minutes of box breathing can significantly reduce acute anxiety.'});
+  } else {
+    overallClass='Distressed';headline='Your results indicate significant distress';subtext='Your scores suggest you may be experiencing significant psychological distress. This is serious — and support is available to you right now. You are not alone.';badgeClass='bs';dotColor='var(--rose)';
+    recs=[{ico:'🏥',bg:'ic-r',title:'Seek Professional Support — Soon',body:"Please visit your campus health centre or counselling unit as soon as possible. Show them your results. You deserve professional care — reaching out is a sign of strength."},{ico:'📞',bg:'ic-r',title:'Contact a Crisis Helpline',body:'You can speak to someone right now, free and confidentially. <strong>Nigerian Suicide Prevention Helpline: 0800-PREVENT (0800-7738368)</strong>. Available 24/7.'},{ico:'💬',bg:'ic-b',title:'Tell Someone You Trust Today',body:"Don't carry this alone. Reach out to a trusted friend, family member, or lecturer today."},{ico:'🌙',bg:'ic-g',title:'Focus on Fundamentals First',body:'When overwhelmed, return to basics: eat regularly, sleep consistently, and get outside each day. Small self-care acts stabilise mood while you access further support.'}];
+  }
+
+  lastResult={phqScore,gadScore,pssScore,phqPct,gadPct,pssPct,overallPct,overallClass,phqSev,gadSev,pssSev,maxCat,badgeClass};
+
+  document.getElementById('res-badge').className='res-badge '+badgeClass;
+  document.getElementById('bdot').style.background=dotColor;
+  document.getElementById('blabel').textContent=overallClass;
+  document.getElementById('res-h2').textContent=headline;
+  document.getElementById('res-p').textContent=subtext;
+  document.getElementById('phq-score').textContent=phqScore;document.getElementById('gad-score').textContent=gadScore;document.getElementById('pss-score').textContent=pssScore;
+  document.getElementById('phq-sev').textContent=phqSev[0];document.getElementById('phq-sev').className='sc-sev '+phqSev[1];
+  document.getElementById('gad-sev').textContent=gadSev[0];document.getElementById('gad-sev').className='sc-sev '+gadSev[1];
+  document.getElementById('pss-sev').textContent=pssSev[0];document.getElementById('pss-sev').className='sc-sev '+pssSev[1];
+
+  const barColor=p=>p<40?'rgba(61,220,151,.85)':p<70?'var(--amber)':'var(--rose)';
+  const countUp=(el,target)=>{let c=0;const step=Math.max(1,Math.round(target/40));const t=setInterval(()=>{c=Math.min(c+step,target);el.textContent=c+'%';if(c>=target)clearInterval(t);},28);};
+  const animBar=(bid,pid,pct)=>{const bar=document.getElementById(bid);const pctEl=document.getElementById(pid);bar.style.background=barColor(pct);requestAnimationFrame(()=>setTimeout(()=>{bar.style.width=pct+'%';},80));countUp(pctEl,pct);};
+  animBar('phq-bar','phq-pct',phqPct);animBar('gad-bar','gad-pct',gadPct);animBar('pss-bar','pss-pct',pssPct);
+  const ringFill=document.getElementById('ring-fill');const ringPctEl=document.getElementById('ring-pct');
+  const ringColor=maxCat===0?'rgba(61,220,151,.9)':maxCat<=2?'var(--amber)':'var(--rose)';
+  ringFill.style.stroke=ringColor;
+  requestAnimationFrame(()=>setTimeout(()=>{ringFill.style.strokeDashoffset=439.82-(overallPct/100)*439.82;},120));
+  countUp(ringPctEl,overallPct);
+
+  document.getElementById('recs').innerHTML=recs.map(r=>`<div class="rec-card"><div class="rec-ico ${r.bg}">${r.ico}</div><div class="rec-text"><h4>${r.title}</h4><p>${r.body}</p></div></div>`).join('');
+
+  const shareBadge=document.getElementById('share-badge-el');shareBadge.className='sc-badge '+badgeClass;shareBadge.innerHTML=`<span class="bdot" style="background:${dotColor};width:8px;height:8px;border-radius:50%;display:inline-block"></span> ${overallClass}`;
+  document.getElementById('share-headline-el').textContent=headline;
+  document.getElementById('share-scores-el').innerHTML=`<div class="share-score-item"><div class="v">${phqScore}/27</div><div class="l">Depression</div></div><div class="share-score-item"><div class="v">${gadScore}/21</div><div class="l">Anxiety</div></div><div class="share-score-item"><div class="v">${pssScore}/40</div><div class="l">Stress</div></div><div class="share-score-item"><div class="v">${overallPct}%</div><div class="l">Risk Score</div></div>`;
+  document.getElementById('share-date-el').textContent='Assessment date: '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  saveSession(phqScore,gadScore,pssScore,overallPct,overallClass,phqPct,gadPct,pssPct);
+  chatHistory=[];document.getElementById('chat-msgs').innerHTML='';
+  buildChatSuggestions(overallClass,phqSev[0],gadSev[0],pssSev[0]);
+  buildChatContextChips(phqScore,gadScore,pssScore,overallPct,overallClass);
+  goTo('s-result');
+  switchTab('t-recs',document.querySelectorAll('.res-tab')[0]);
+}
+
+// ═══════════════════════════════════
+// AI CHAT
+// ═══════════════════════════════════
+function buildChatSuggestions(cls,phqSevLabel,gadSevLabel,pssSevLabel){
+  const sugs=['What does my risk score mean?',`What can I do about my ${phqSevLabel.toLowerCase()}?`,'Should I see a counsellor?','How do I talk to someone about this?','Will it get better?'];
+  document.getElementById('chat-sugs').innerHTML=sugs.map(s=>`<div class="sug-chip" onclick="sendSuggestion('${s.replace(/'/g,"\\'")}')">💬 ${s}</div>`).join('');
+}
+function buildChatContextChips(phq,gad,pss,pct,cls){
+  document.getElementById('chat-ctx-chips').innerHTML=`<span class="ctx-chip">PHQ-9: ${phq}/27</span><span class="ctx-chip">GAD-7: ${gad}/21</span><span class="ctx-chip">PSS-10: ${pss}/40</span><span class="ctx-chip">Risk: ${pct}%</span><span class="ctx-chip">${cls}</span>`;
+}
+function mountInlineChat(){
+  const mount=document.getElementById('inline-chat-mount');
+  if(mount.dataset.mounted)return;
+  mount.dataset.mounted='1';
+  mount.innerHTML=`<div class="chat-context" style="margin-top:0;margin-bottom:16px;"><span style="font-size:22px">🤖</span><div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:6px;">Ask me anything about your results</div><div class="chat-ctx-scores" id="inline-chips"></div></div></div><div class="chat-suggestions" id="inline-sugs"></div><div class="chat-messages" id="inline-msgs" style="min-height:200px;max-height:380px;overflow-y:auto;background:var(--bg3);border-radius:14px;padding:16px;margin-bottom:14px;display:flex;flex-direction:column;gap:12px;"></div><div class="chat-input-row"><textarea class="chat-input" id="inline-in" placeholder="Type your question…" rows="1" onkeydown="inlineChatKeydown(event)" oninput="autoResize(this)"></textarea><button class="btn-send" onclick="sendInlineChat()">➤</button></div>`;
+  if(lastResult){
+    const{phqScore,gadScore,pssScore,overallPct,overallClass,phqSev,gadSev,pssSev}=lastResult;
+    document.getElementById('inline-chips').innerHTML=`<span class="ctx-chip">PHQ-9: ${phqScore}/27</span><span class="ctx-chip">GAD-7: ${gadScore}/21</span><span class="ctx-chip">PSS-10: ${pssScore}/40</span><span class="ctx-chip">Risk: ${overallPct}%</span>`;
+    const sugs=['What does my score mean?',`How to manage ${phqSev[0].toLowerCase()}?`,'Is this serious?','What should I do first?'];
+    document.getElementById('inline-sugs').innerHTML=sugs.map(s=>`<div class="sug-chip" onclick="sendInlineSuggestion('${s.replace(/'/g,"\\'")}')">💬 ${s}</div>`).join('');
+  }
+  addAIMsg('inline-msgs','Hello! I can see your assessment results. Ask me anything about what your scores mean, coping strategies, or next steps. What would you like to know?');
+}
+function getSystemPrompt(){
+  if(!lastResult)return'You are a compassionate AI mental health assistant for Nigerian university students. Be empathetic and evidence-based.';
+  const{phqScore,gadScore,pssScore,overallPct,overallClass,phqSev,gadSev,pssSev}=lastResult;
+  return`You are MindBridge, a compassionate AI mental health support assistant for Nigerian university students. The student has just completed a validated mental health assessment with these results:\n- PHQ-9 (Depression): ${phqScore}/27 — ${phqSev[0]}\n- GAD-7 (Anxiety): ${gadScore}/21 — ${gadSev[0]}\n- PSS-10 (Perceived Stress): ${pssScore}/40 — ${pssSev[0]}\n- Overall Risk Score: ${overallPct}% — Classification: ${overallClass}\n\nGuidelines:\n1. Be warm, empathetic, and non-judgmental. Never be dismissive.\n2. Explain what scores mean in plain, non-clinical language.\n3. Provide practical, evidence-based coping strategies relevant to Nigerian university students.\n4. If the student expresses distress or crisis, always provide the Nigerian helpline: 0800-PREVENT (0800-7738368).\n5. Never diagnose. Always recommend professional help for serious concerns.\n6. Keep responses concise (2-4 paragraphs max) unless a longer answer is clearly needed.\n7. Be aware of Nigerian university context: ASUU strikes, financial pressures, accommodation challenges.`;
+}
+let inlineChatHistory=[];
+async function sendInlineChat(){
+  const inp=document.getElementById('inline-in');const msg=inp.value.trim();if(!msg)return;
+  inp.value='';autoResize(inp);
+  addUserMsg('inline-msgs',msg);
+  inlineChatHistory.push({role:'user',content:msg});
+  const typingId=addTypingMsg('inline-msgs');
+  const reply=await callClaude(inlineChatHistory,getSystemPrompt());
+  removeTyping('inline-msgs',typingId);
+  inlineChatHistory.push({role:'assistant',content:reply});
+  addAIMsg('inline-msgs',reply);
+}
+function inlineChatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendInlineChat();}}
+function sendInlineSuggestion(text){document.getElementById('inline-in').value=text;sendInlineChat();}
+async function sendChat(){
+  const inp=document.getElementById('chat-in');const msg=inp.value.trim();if(!msg)return;
+  inp.value='';autoResize(inp);document.getElementById('btn-send').disabled=true;
+  addUserMsg('chat-msgs',msg);chatHistory.push({role:'user',content:msg});
+  const typingId=addTypingMsg('chat-msgs');
+  const reply=await callClaude(chatHistory,getSystemPrompt());
+  removeTyping('chat-msgs',typingId);
+  chatHistory.push({role:'assistant',content:reply});
+  addAIMsg('chat-msgs',reply);
+  document.getElementById('btn-send').disabled=false;
+}
+function chatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+function sendSuggestion(text){document.getElementById('chat-in').value=text;sendChat();}
+async function callClaude(history,systemPrompt){
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-request-allowed':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:systemPrompt,messages:history})
+    });
+    if(!res.ok){const errTxt=await res.text();console.error('API error:',res.status,errTxt);return'Connection error ('+res.status+'). Please try again in a moment.';}
+    const data=await res.json();
+    return data.content?.[0]?.text||'Could not generate a response. Please try again.';
+  }catch(e){
+    console.error('callClaude error:',e);
+    return'I am having trouble connecting. Please try again. If you need immediate support, call 0800-PREVENT (0800-7738368).';
+  }
+}
+function addUserMsg(container,text){const el=document.createElement('div');el.className='msg user';el.textContent=text;document.getElementById(container).appendChild(el);scrollMsgs(container);}
+function addAIMsg(container,text){const el=document.createElement('div');el.className='msg ai';el.innerHTML=text.replace(/\n/g,'<br>');document.getElementById(container).appendChild(el);scrollMsgs(container);}
+function addTypingMsg(container){const id='typing-'+Date.now();const el=document.createElement('div');el.className='msg typing';el.id=id;el.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';document.getElementById(container).appendChild(el);scrollMsgs(container);return id;}
+function removeTyping(container,id){const el=document.getElementById(id);if(el)el.remove();}
+function scrollMsgs(container){const c=document.getElementById(container);if(c)c.scrollTop=c.scrollHeight;}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,140)+'px';}
+
+// ═══════════════════════════════════
+// BREATHING EXERCISE
+// ═══════════════════════════════════
+let breatheTimer=null,breatheRunning=false,breatheCycle=0,breathePhase=0;
+const breathePhases=[{label:'Breathe In',duration:4,cls:'expand'},{label:'Hold',duration:4,cls:'hold'},{label:'Breathe Out',duration:4,cls:'shrink'},{label:'Hold',duration:4,cls:''}];
+function startBreathe(){goTo('s-breathe');breatheCycle=0;breatheRunning=false;document.getElementById('breathe-label').textContent='Ready';document.getElementById('breathe-count').textContent='';document.getElementById('breathe-phase').textContent='Press Start to begin';document.getElementById('breathe-cycles').textContent='Cycle 0 of 5';document.getElementById('btn-breathe-start').textContent='\u25b6 Start';}
+function exitBreathe(){stopBreathe();goTo('s-result');}
+function toggleBreathe(){if(breatheRunning)stopBreathe();else runBreathe();}
+function stopBreathe(){breatheRunning=false;clearTimeout(breatheTimer);document.getElementById('btn-breathe-start').textContent='\u25b6 Start';document.getElementById('breathe-ring').className='breathe-ring';}
+function runBreathe(){
+  breatheRunning=true;document.getElementById('btn-breathe-start').textContent='\u23f9 Stop';
+  breatheCycle=0;breathePhase=0;runPhase();
+}
+function runPhase(){
+  if(!breatheRunning)return;
+  if(breatheCycle>=5){stopBreathe();document.getElementById('breathe-label').textContent='Well done!';document.getElementById('breathe-phase').textContent='Session complete. Take a moment to notice how you feel.';document.getElementById('breathe-count').textContent='\u2713';return;}
+  const phase=breathePhases[breathePhase];
+  const ring=document.getElementById('breathe-ring');ring.className='breathe-ring '+phase.cls;
+  document.getElementById('breathe-label').textContent=phase.label;
+  document.getElementById('breathe-cycles').textContent='Cycle '+(breatheCycle+1)+' of 5';
+  let sec=phase.duration;
+  document.getElementById('breathe-count').textContent=sec;
+  document.getElementById('breathe-phase').textContent=phase.label.toUpperCase();
+  const tick=()=>{if(!breatheRunning)return;sec--;document.getElementById('breathe-count').textContent=sec;if(sec<=0){breathePhase=(breathePhase+1)%4;if(breathePhase===0)breatheCycle++;runPhase();}else{breatheTimer=setTimeout(tick,1000);}};
+  breatheTimer=setTimeout(tick,1000);
+}
+
+// ═══════════════════════════════════
+// MOOD TRACKER
+// ═══════════════════════════════════
+function logMood(){
+  const mood=document.getElementById('sl-mood').value;
+  const energy=document.getElementById('sl-energy').value;
+  const stress=document.getElementById('sl-stress').value;
+  const note=document.getElementById('mood-note').value.trim();
+  const entry={date:new Date().toISOString(),mood:+mood,energy:+energy,stress:+stress,note};
+  const history=getMoodHistory();history.unshift(entry);
+  localStorage.setItem('mb_mood',JSON.stringify(history.slice(0,60)));
+  document.getElementById('mood-note').value='';
+  renderMoodHistory();
+  const saved=document.createElement('div');saved.style.cssText='background:rgba(61,220,151,.12);border:1px solid rgba(61,220,151,.2);border-radius:12px;padding:12px 16px;font-size:14px;color:var(--green);text-align:center;margin-top:12px;';saved.textContent='\u2713 Check-in logged!';document.querySelector('.mood-checkin').appendChild(saved);setTimeout(()=>saved.remove(),2500);
+}
+function getMoodHistory(){try{return JSON.parse(localStorage.getItem('mb_mood')||'[]');}catch{return[];}}
+function renderMoodHistory(){
+  const hist=getMoodHistory();const list=document.getElementById('mood-history-list');
+  if(!hist.length){list.innerHTML='<div class="mood-empty">No check-ins yet. Log your first one above!</div>';return;}
+  list.innerHTML=hist.slice(0,14).map(e=>{
+    const d=new Date(e.date);const ds=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+' \u00b7 '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    const mH=Math.round((e.mood/10)*40);const eH=Math.round((e.energy/10)*40);const sH=Math.round((e.stress/10)*40);
+    const mC=e.mood>=7?'var(--green)':e.mood>=4?'var(--amber)':'var(--rose)';
+    return`<div class="mood-entry"><div class="mood-entry-bars"><div class="mbar" style="height:${mH}px;background:${mC}" title="Mood"></div><div class="mbar" style="height:${eH}px;background:var(--green)" title="Energy"></div><div class="mbar" style="height:${sH}px;background:var(--rose)" title="Stress"></div></div><div class="mood-entry-meta"><div class="mood-entry-date">${ds}</div><div class="mood-entry-values">Mood ${e.mood}/10 · Energy ${e.energy}/10 · Stress ${e.stress}/10</div>${e.note?`<div class="mood-entry-note">"${e.note}"</div>`:''}</div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════
+function getSessions(){try{return JSON.parse(localStorage.getItem('mb_sessions')||'[]');}catch{return[];}}
+function saveSession(phq,gad,pss,pct,cls,phqPct,gadPct,pssPct){
+  const sessions=getSessions();sessions.unshift({date:new Date().toISOString(),phq,gad,pss,pct,cls,phqPct,gadPct,pssPct});localStorage.setItem('mb_sessions',JSON.stringify(sessions.slice(0,20)));
+}
+function renderDashboard(){
+  const sessions=getSessions();const moods=getMoodHistory();
+  document.getElementById('ds-sessions').textContent=sessions.length;
+  document.getElementById('ds-checkins').textContent=moods.length;
+  if(sessions.length>=2){const diff=sessions[0].pct-sessions[1].pct;document.getElementById('ds-trend').textContent=diff<0?'\u2193 Better':diff>0?'\u2191 Higher':'\u2192 Same';}
+  const hist=document.getElementById('dash-history');
+  if(!sessions.length){hist.innerHTML='<div class="dash-empty"><p>No assessment history yet.</p><button class="btn-action primary" onclick="goTo(\'s-demo\')">+ Take First Assessment</button></div>';return;}
+  hist.innerHTML=sessions.slice(0,10).map((s,i)=>{
+    const d=new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const bc=s.cls==='Healthy'?'bh':s.cls==='At Risk'?'bm':'bs';
+    const arrow=i<sessions.length-1?(s.pct<sessions[i+1].pct?'\u2193':'\u2191'):'';const arrowColor=arrow==='\u2193'?'var(--green)':'var(--rose)';
+    return`<div class="history-card"><div class="hc-top"><span class="hc-date">\uD83D\uDCC5 ${d}</span><span class="hc-badge ${bc}">${s.cls} <span style="font-size:15px;font-weight:600;">${s.pct}%</span> <span style="color:${arrowColor}">${arrow}</span></span></div><div class="hc-scores"><span class="hc-score-chip">PHQ-9: ${s.phq}/27 (${s.phqPct}%)</span><span class="hc-score-chip">GAD-7: ${s.gad}/21 (${s.gadPct}%)</span><span class="hc-score-chip">PSS-10: ${s.pss}/40 (${s.pssPct}%)</span></div></div>`;
+  }).join('');
+  if(sessions.length>=2){
+    const pts=sessions.slice(0,10).reverse();const n=pts.length;const w=600;const h=100;
+    const minP=Math.min(...pts.map(p=>p.pct));const maxP=Math.max(...pts.map(p=>p.pct));const range=Math.max(maxP-minP,10);
+    const cx=i=>20+(i/(n-1))*(w-40);const cy=p=>h-20-((p-minP)/range)*(h-40);
+    const polyline=pts.map((p,i)=>`${cx(i)},${cy(p.pct)}`).join(' ');
+    const colorForPct=p=>p<40?'#3DDC97':p<70?'#F5A623':'#F05C5C';
+    const circles=pts.map((p,i)=>`<circle cx="${cx(i)}" cy="${cy(p.pct)}" r="5" fill="${colorForPct(p.pct)}"/><text x="${cx(i)}" y="${cy(p.pct)-10}" text-anchor="middle" font-size="10" fill="${colorForPct(p.pct)}">${p.pct}%</text>`).join('');
+    document.getElementById('trend-empty').style.display='none';
+    const svg=document.getElementById('trend-svg');svg.style.display='block';
+    svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+    svg.innerHTML=`<polyline points="${polyline}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>${circles}`;
+  }
+}
+function clearHistory(){if(confirm('Clear all assessment and mood history? This cannot be undone.')){localStorage.removeItem('mb_sessions');localStorage.removeItem('mb_mood');renderDashboard();renderMoodHistory();}}
+
+// ═══════════════════════════════════
+// SHARE / DOWNLOAD
+// ═══════════════════════════════════
+function downloadCard(){
+  if(!lastResult){alert('Complete an assessment first.');return;}
+  const{phqScore,gadScore,pssScore,overallPct,overallClass,phqSev,gadSev,pssSev,badgeClass}=lastResult;
+  const canvas=document.getElementById('share-canvas');canvas.width=600;canvas.height=380;const ctx=canvas.getContext('2d');
+  const bgColor=overallClass==='Healthy'?'#0A1F14':overallClass==='At Risk'?'#1A1005':'#1A0505';
+  ctx.fillStyle=bgColor;ctx.roundRect(0,0,600,380,20);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.05)';ctx.roundRect(20,20,560,340,14);ctx.fill();
+  ctx.font='bold 13px sans-serif';ctx.fillStyle='rgba(255,255,255,.3)';ctx.textAlign='center';ctx.fillText('MINDBRIDGE MENTAL HEALTH ASSESSMENT',300,55);
+  const clsColor=overallClass==='Healthy'?'#3DDC97':overallClass==='At Risk'?'#F5A623':'#F05C5C';
+  ctx.font='300 42px serif';ctx.fillStyle=clsColor;ctx.fillText(overallClass,300,105);
+  ctx.font='bold 56px sans-serif';ctx.fillStyle='#F0EFF8';ctx.fillText(overallPct+'%',300,170);
+  ctx.font='13px sans-serif';ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillText('OVERALL RISK SCORE',300,195);
+  const cols=[150,300,450];const labels=['Depression (PHQ-9)','Anxiety (GAD-7)','Stress (PSS-10)'];const scores=[`${phqScore}/27 \u00b7 ${phqSev[0]}`,`${gadScore}/21 \u00b7 ${gadSev[0]}`,`${pssScore}/40 \u00b7 ${pssSev[0]}`];const pcts=[lastResult.phqPct+'%',lastResult.gadPct+'%',lastResult.pssPct+'%'];
+  cols.forEach((x,i)=>{ctx.font='bold 26px sans-serif';ctx.fillStyle='#F0EFF8';ctx.fillText(pcts[i],x,250);ctx.font='12px sans-serif';ctx.fillStyle='rgba(255,255,255,.4)';ctx.fillText(labels[i],x,272);ctx.font='11px sans-serif';ctx.fillStyle='rgba(255,255,255,.3)';ctx.fillText(scores[i],x,290);});
+  ctx.font='11px sans-serif';ctx.fillStyle='rgba(255,255,255,.2)';ctx.fillText('MindBridge \u00b7 Not a clinical diagnosis \u00b7 '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}),300,345);
+  const link=document.createElement('a');link.download='MindBridge-Result-'+new Date().toISOString().slice(0,10)+'.png';link.href=canvas.toDataURL();link.click();
+}
+function copyResults(){
+  if(!lastResult){alert('Complete an assessment first.');return;}
+  const{phqScore,gadScore,pssScore,overallPct,overallClass,phqSev,gadSev,pssSev}=lastResult;
+  const text=`MindBridge Mental Health Assessment\nDate: ${new Date().toLocaleDateString('en-GB')}\n\nClassification: ${overallClass}\nOverall Risk Score: ${overallPct}%\n\nDepression (PHQ-9): ${phqScore}/27 \u2014 ${phqSev[0]}\nAnxiety (GAD-7): ${gadScore}/21 \u2014 ${gadSev[0]}\nPerceived Stress (PSS-10): ${pssScore}/40 \u2014 ${pssSev[0]}\n\nNot a clinical diagnosis. If in crisis: 0800-PREVENT (0800-7738368)`;
+  navigator.clipboard.writeText(text).then(()=>{alert('Results copied to clipboard!');}).catch(()=>{alert('Copy failed \u2014 please screenshot your results instead.');});
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+renderQ();
+// Apply theme icons on init
+(function(){
+  const saved=document.documentElement.getAttribute('data-theme')||'dark';
+  const icon=saved==='dark'?'\u2600\uFE0F':'\uD83C\uDF19';
+  document.querySelectorAll('.theme-toggle').forEach(b=>b.textContent=icon);
+})();
+</script>
+</body>
+</html>
